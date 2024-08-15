@@ -25,11 +25,12 @@ fn main() {
         draw_cells(&game);
         to_screen(&game);
         ::std::thread::sleep(tick_duration);
+        println!("{:?}", game.update_delay());
         handle_events(&game, &mut game_state);
         if game_state == GameState::Run && tick_num % game.update_delay() == 0 {
             compute_cells_next_state(&game);
             update_cells_state(&game);
-            tick_num = 0;
+            tick_num = 1;
         } else {
             tick_num += 1;
         }

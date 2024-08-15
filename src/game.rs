@@ -29,7 +29,7 @@ impl Game {
         Self {
             display: Display::new(width * CELL_SIZE, height * CELL_SIZE),
             grid: CellGrid::new(width, height),
-            update_delay: Cell::new(FPS / 2),
+            update_delay: Cell::new(FPS),
         }
     }
 
@@ -39,16 +39,18 @@ impl Game {
 
     pub fn increase_update_delay(&self) {
         let current_update_delay = self.update_delay.get();
-        if current_update_delay > 4 {
-            self.update_delay.set(current_update_delay - 4);
+
+        if current_update_delay >= FPS / 12 {
+            self.update_delay.set(current_update_delay - (FPS / 12));
+        } else {
+            self.update_delay.set(1);
         }
     }
 
     pub fn decrease_update_delay(&self) {
         let current_update_delay = self.update_delay.get();
-        if current_update_delay < FPS {
-            self.update_delay.set(current_update_delay);
-        }
+
+        self.update_delay.set(current_update_delay + (FPS / 12));
     }
 }
 
