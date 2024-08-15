@@ -23,11 +23,11 @@ pub struct Game {
 
 impl Game {
     pub fn new(width: u32, height: u32) -> Self {
-        let width = (width / CELL_SIZE) * CELL_SIZE;
-        let height = (height / CELL_SIZE) * CELL_SIZE;
+        let width = width / CELL_SIZE;
+        let height = height / CELL_SIZE;
 
         Self {
-            display: Display::new(width, height),
+            display: Display::new(width * CELL_SIZE, height * CELL_SIZE),
             grid: CellGrid::new(width, height),
             update_rate: Cell::new(FPS / 2),
         }
@@ -59,11 +59,11 @@ pub fn clear_canvas(game: &Game) {
 
 pub fn draw_grid(game: &Game) {
     game.display.set_draw_color(255, 255, 255);
-    for y in 1..game.grid.height - 1 {
+    for y in 1..game.grid.height {
         game.display
             .draw_line(0, y * CELL_SIZE, game.display.width, y * CELL_SIZE);
     }
-    for x in 1..game.grid.width - 1 {
+    for x in 1..game.grid.width {
         game.display
             .draw_line(x * CELL_SIZE, 0, x * CELL_SIZE, game.display.height);
     }
@@ -71,8 +71,8 @@ pub fn draw_grid(game: &Game) {
 
 pub fn draw_cells(game: &Game) {
     game.display.set_draw_color(255, 255, 255);
-    for y in 0..game.grid.height - 1 {
-        for x in 0..game.grid.width - 1 {
+    for y in 0..game.grid.height {
+        for x in 0..game.grid.width {
             if game.grid.cell(x, y).alive.get() {
                 game.display
                     .fill_rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE);

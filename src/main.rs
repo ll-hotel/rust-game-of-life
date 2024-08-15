@@ -15,7 +15,7 @@ fn main() {
     let tick_duration = Duration::new(0, 1_000_000_000 / FPS);
     let mut game_state = GameState::Edit;
     let mut tick_num: u32 = 0;
-    let game = Game::new(700, 700);
+    let game = Game::new(1000, 1000);
 
     while game_state != GameState::Quit {
         clear_canvas(&game);
