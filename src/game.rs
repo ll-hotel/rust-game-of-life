@@ -40,7 +40,7 @@ impl Game {
     pub fn increase_update_delay(&self) {
         let current_update_delay = self.update_delay.get();
 
-        if current_update_delay >= FPS / 12 {
+        if current_update_delay > FPS / 12 {
             self.update_delay.set(current_update_delay - (FPS / 12));
         } else {
             self.update_delay.set(1);
@@ -174,10 +174,14 @@ pub fn handle_events(game: &Game, game_state: &mut GameState) {
                         }
                     }
                     SDLK_UP => {
-                        game.increase_update_delay();
+                        if *game_state == GameState::Run {
+                            game.increase_update_delay();
+                        }
                     }
                     SDLK_DOWN => {
-                        game.decrease_update_delay();
+                        if *game_state == GameState::Run {
+                            game.decrease_update_delay();
+                        }
                     }
                     _ => {}
                 }
@@ -214,20 +218,21 @@ pub fn handle_events(game: &Game, game_state: &mut GameState) {
                 window_id: _,
                 which: _,
                 x: _,
-                y: _,
+                y,
                 direction,
                 precise_x: _,
                 precise_y: _,
                 mouse_x: _,
                 mouse_y: _,
             } => {
-                if *game_state == GameState::Edit {
+                if *game_state == GameState::Run {
                     match direction {
                         MouseWheelDirection::Normal => {
-                            game.increase_update_delay();
-                        }
-                        MouseWheelDirection::Flipped => {
-                            game.decrease_update_delay();
+                            if y > 0 {
+                                game.increase_update_delay();
+                            } else if y < 0 {
+                                game.decrease_update_delay();
+                            }
                         }
                         _ => {}
                     }
