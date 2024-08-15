@@ -50,7 +50,9 @@ impl Game {
     pub fn decrease_update_delay(&self) {
         let current_update_delay = self.update_delay.get();
 
-        self.update_delay.set(current_update_delay + (FPS / 12));
+        if current_update_delay > FPS * 10 {
+            self.update_delay.set(current_update_delay + (FPS / 12));
+        }
     }
 }
 
