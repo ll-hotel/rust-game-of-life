@@ -2,7 +2,7 @@ use crate::{
     display::Display,
     grid::{CellGrid, GridCell},
 };
-use sdl2::{event::Event, sys::SDL_KeyCode};
+use sdl2::{event::Event, mouse::MouseWheelDirection, sys::SDL_KeyCode};
 use std::cell::Cell;
 
 pub const FPS: u32 = 60;
@@ -18,7 +18,7 @@ pub enum GameState {
 pub struct Game {
     display: Display,
     grid: CellGrid,
-    update_rate: Cell<u32>,
+    update_delay: Cell<u32>,
 }
 
 impl Game {
@@ -29,25 +29,25 @@ impl Game {
         Self {
             display: Display::new(width * CELL_SIZE, height * CELL_SIZE),
             grid: CellGrid::new(width, height),
-            update_rate: Cell::new(FPS / 2),
+            update_delay: Cell::new(FPS / 2),
         }
     }
 
-    pub fn update_rate(&self) -> u32 {
-        self.update_rate.get()
+    pub fn update_delay(&self) -> u32 {
+        self.update_delay.get()
     }
 
-    pub fn increase_update_rate(&self) {
-        let current_update_rate = self.update_rate.get();
-        if current_update_rate > 4 {
-            self.update_rate.set(current_update_rate - 4);
+    pub fn increase_update_delay(&self) {
+        let current_update_delay = self.update_delay.get();
+        if current_update_delay > 4 {
+            self.update_delay.set(current_update_delay - 4);
         }
     }
 
-    pub fn decrease_update_rate(&self) {
-        let current_update_rate = self.update_rate.get();
-        if current_update_rate < FPS - 4 {
-            self.update_rate.set(current_update_rate + 4);
+    pub fn decrease_update_delay(&self) {
+        let current_update_delay = self.update_delay.get();
+        if current_update_delay < FPS {
+            self.update_delay.set(current_update_delay);
         }
     }
 }
@@ -172,10 +172,10 @@ pub fn handle_events(game: &Game, game_state: &mut GameState) {
                         }
                     }
                     SDLK_UP => {
-                        game.increase_update_rate();
+                        game.increase_update_delay();
                     }
                     SDLK_DOWN => {
-                        game.decrease_update_rate();
+                        game.decrease_update_delay();
                     }
                     _ => {}
                 }
@@ -202,6 +202,30 @@ pub fn handle_events(game: &Game, game_state: &mut GameState) {
                                 .cell(x as u32 / CELL_SIZE, y as u32 / CELL_SIZE)
                                 .alive
                                 .set(false);
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            Event::MouseWheel {
+                timestamp: _,
+                window_id: _,
+                which: _,
+                x: _,
+                y: _,
+                direction,
+                precise_x: _,
+                precise_y: _,
+                mouse_x: _,
+                mouse_y: _,
+            } => {
+                if *game_state == GameState::Edit {
+                    match direction {
+                        MouseWheelDirection::Normal => {
+                            game.increase_update_delay();
+                        }
+                        MouseWheelDirection::Flipped => {
+                            game.decrease_update_delay();
                         }
                         _ => {}
                     }

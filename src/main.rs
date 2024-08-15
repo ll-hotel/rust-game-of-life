@@ -26,7 +26,7 @@ fn main() {
         to_screen(&game);
         ::std::thread::sleep(tick_duration);
         handle_events(&game, &mut game_state);
-        if game_state == GameState::Run && tick_num % game.update_rate() == 0 {
+        if game_state == GameState::Run && tick_num % game.update_delay() == 0 {
             compute_cells_next_state(&game);
             update_cells_state(&game);
             tick_num = 0;
