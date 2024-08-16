@@ -50,7 +50,7 @@ impl Game {
     pub fn decrease_update_delay(&self) {
         let current_update_delay = self.update_delay.get();
 
-        if current_update_delay > FPS * 10 {
+        if current_update_delay < FPS * 10 {
             self.update_delay.set(current_update_delay + (FPS / 12));
         }
     }
@@ -93,8 +93,8 @@ pub fn compute_cells_next_state(game: &Game) {
     let mut bottom: bool;
     let mut left: bool;
 
-    for y in 0..game.grid.height - 1 {
-        for x in 0..game.grid.width - 1 {
+    for y in 0..game.grid.height {
+        for x in 0..game.grid.width {
             cell = game.grid.cell(x, y);
             neighbourhood = 0;
             top = y > 0;
@@ -134,8 +134,8 @@ pub fn compute_cells_next_state(game: &Game) {
 }
 
 pub fn update_cells_state(game: &Game) {
-    for y in 0..game.grid.height - 1 {
-        for x in 0..game.grid.width - 1 {
+    for y in 0..game.grid.height {
+        for x in 0..game.grid.width {
             let cell = game.grid.cell(x, y);
             cell.alive.set(cell.next_state.get());
         }
