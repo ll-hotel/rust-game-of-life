@@ -15,10 +15,18 @@ pub enum GameState {
     Quit,
 }
 
+#[derive(PartialEq, Eq, Clone, Copy)]
+enum DrawingState {
+    Off,
+    Alive,
+    Dead,
+}
+
 pub struct Game {
     display: Display,
     grid: CellGrid,
     update_delay: Cell<u32>,
+    drawing: DrawingState,
 }
 
 impl Game {
@@ -29,7 +37,8 @@ impl Game {
         Self {
             display: Display::new(width * CELL_SIZE, height * CELL_SIZE),
             grid: CellGrid::new(width, height),
-            update_delay: Cell::new(FPS),
+            update_delay: Cell::new(FPS / 10),
+            drawing: DrawingState::Off,
         }
     }
 
@@ -142,7 +151,7 @@ pub fn update_cells_state(game: &Game) {
     }
 }
 
-pub fn handle_events(game: &Game, game_state: &mut GameState) {
+pub fn handle_events(game: &mut Game, game_state: &mut GameState) {
     let events = game.display.get_events();
 
     for event in events {
@@ -200,18 +209,29 @@ pub fn handle_events(game: &Game, game_state: &mut GameState) {
                 if *game_state == GameState::Edit {
                     match mouse_btn {
                         sdl2::mouse::MouseButton::Left => {
-                            game.grid
-                                .cell(x as u32 / CELL_SIZE, y as u32 / CELL_SIZE)
-                                .alive
-                                .set(true);
+                            game.drawing = DrawingState::Alive;
+                            set_cell(game, x, y, true);
                         }
                         sdl2::mouse::MouseButton::Right => {
-                            game.grid
-                                .cell(x as u32 / CELL_SIZE, y as u32 / CELL_SIZE)
-                                .alive
-                                .set(false);
+                            game.drawing = DrawingState::Dead;
+                            set_cell(game, x, y, false);
                         }
                         _ => {}
+                    }
+                }
+            }
+            Event::MouseButtonUp {
+                timestamp: _,
+                window_id: _,
+                which: _,
+                mouse_btn,
+                clicks: _,
+                x: _,
+                y: _,
+            } => {
+                if *game_state == GameState::Edit {
+                    if mouse_btn == sdl2::mouse::MouseButton::Left || mouse_btn == sdl2::mouse::MouseButton::Right {
+                        game.drawing = DrawingState::Off;
                     }
                 }
             }
@@ -240,6 +260,23 @@ pub fn handle_events(game: &Game, game_state: &mut GameState) {
                     }
                 }
             }
+            Event::MouseMotion {
+                timestamp: _,
+                window_id: _,
+                which: _,
+                mousestate: _,
+                x,
+                y,
+                xrel: _,
+                yrel: _,
+            } => {
+                if game.drawing == DrawingState::Alive {
+                    set_cell(game, x, y, true);
+                }
+                if game.drawing == DrawingState::Dead {
+                    set_cell(game, x, y, false);
+                }
+            }
             _ => {}
         }
     }
@@ -252,4 +289,11 @@ const SDLK_DOWN: i32 = SDL_KeyCode::SDLK_DOWN as i32;
 
 pub fn to_screen(game: &Game) {
     game.display.present();
+}
+
+fn  set_cell(game: &Game, x: i32, y: i32, val: bool) {
+    game.grid
+        .cell(x as u32 / CELL_SIZE, y as u32 / CELL_SIZE)
+        .alive
+        .set(val);
 }

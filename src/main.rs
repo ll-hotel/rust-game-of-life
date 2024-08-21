@@ -15,7 +15,7 @@ fn main() {
     let tick_duration = Duration::new(0, 1_000_000_000 / FPS);
     let mut game_state = GameState::Edit;
     let mut tick_num: u32 = 0;
-    let game = Game::new(1000, 1000);
+    let mut game = Game::new(1000, 1000);
 
     while game_state != GameState::Quit {
         clear_canvas(&game);
@@ -25,7 +25,7 @@ fn main() {
         draw_cells(&game);
         to_screen(&game);
         ::std::thread::sleep(tick_duration);
-        handle_events(&game, &mut game_state);
+        handle_events(&mut game, &mut game_state);
         if game_state == GameState::Run && tick_num % game.update_delay() == 0 {
             compute_cells_next_state(&game);
             update_cells_state(&game);
